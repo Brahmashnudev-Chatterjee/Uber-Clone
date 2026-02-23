@@ -273,3 +273,117 @@ curl -X POST http://localhost:3000/user/login \
   "error": "Invalid email or password"
 }
 ```
+
+---
+
+### Get User Profile
+**Endpoint:** `GET /user/profile`
+
+**Description:** 
+Retrieve the authenticated user's profile information. Requires a valid JWT token.
+
+**Authentication:**
+Required. Token must be provided in either:
+- Cookie: `token`
+- Authorization header: `Bearer <token>`
+
+**Request Headers:**
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Response Status Codes:**
+
+| Status Code | Description |
+|---|---|
+| 200 | Successfully retrieved user profile. |
+| 401 | Unauthorized. Invalid or expired token. |
+
+**Success Response (200):**
+```json
+{
+  "user": {
+    "_id": "507f1f77bcf86cd799439011",
+    "fullname": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "john@example.com",
+    "socketId": null,
+    "__v": 0
+  }
+}
+```
+
+**Error Response (401):**
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+**Example Request:**
+```bash
+curl -X GET http://localhost:3000/user/profile \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+---
+
+### Logout User
+**Endpoint:** `GET /user/logout`
+
+**Description:** 
+Log out the authenticated user by blacklisting their token and clearing the session cookie.
+
+**Authentication:**
+Required. Token must be provided in either:
+- Cookie: `token`
+- Authorization header: `Bearer <token>`
+
+**Request Headers:**
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Response Status Codes:**
+
+| Status Code | Description |
+|---|---|
+| 200 | User successfully logged out. Token blacklisted. |
+| 400 | Validation error. No token provided. |
+| 401 | Unauthorized. Invalid or expired token. |
+
+**Success Response (200):**
+```json
+{
+  "message": "Logged out successfully"
+}
+```
+
+**Error Response (400):**
+```json
+{
+  "error": "No token found"
+}
+```
+
+**Error Response (401):**
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+**Example Request:**
+```bash
+curl -X GET http://localhost:3000/user/logout \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+**Example Response:**
+```json
+{
+  "message": "Logged out successfully"
+}
+```

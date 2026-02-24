@@ -3,7 +3,7 @@
 ## User Endpoints
 
 ### Register User
-**Endpoint:** `POST /user/register`
+**Endpoint:** `POST /users/register`
 
 **Description:** 
 Register a new user account with email, password, and full name information.
@@ -66,7 +66,7 @@ Register a new user account with email, password, and full name information.
 
 **Example Request:**
 ```bash
-curl -X POST http://localhost:3000/user/register \
+curl -X POST http://localhost:3000/users/register \
   -H "Content-Type: application/json" \
   -d '{
     "fullname": {
@@ -145,7 +145,7 @@ curl -X POST http://localhost:3000/user/register \
 ---
 
 ### Login User
-**Endpoint:** `POST /user/login`
+**Endpoint:** `POST /users/login`
 
 **Description:** 
 Authenticate a user with email and password, returning a JWT token for subsequent authenticated requests.
@@ -210,7 +210,7 @@ Authenticate a user with email and password, returning a JWT token for subsequen
 
 **Example Request:**
 ```bash
-curl -X POST http://localhost:3000/user/login \
+curl -X POST http://localhost:3000/users/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "john@example.com",
@@ -277,7 +277,7 @@ curl -X POST http://localhost:3000/user/login \
 ---
 
 ### Get User Profile
-**Endpoint:** `GET /user/profile`
+**Endpoint:** `GET /users/profile`
 
 **Description:** 
 Retrieve the authenticated user's profile information. Requires a valid JWT token.
@@ -324,14 +324,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 **Example Request:**
 ```bash
-curl -X GET http://localhost:3000/user/profile \
+curl -X GET http://localhost:3000/users/profile \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
 ---
 
 ### Logout User
-**Endpoint:** `GET /user/logout`
+**Endpoint:** `GET /users/logout`
 
 **Description:** 
 Log out the authenticated user by blacklisting their token and clearing the session cookie.
@@ -393,7 +393,7 @@ curl -X GET http://localhost:3000/user/logout \
 ## Captain Endpoints
 
 ### Register Captain
-**Endpoint:** `POST /captain/register`
+**Endpoint:** `POST /captains/register`
 
 **Description:** 
 Register a new captain account with email, password, full name, and vehicle information.
@@ -484,7 +484,7 @@ Register a new captain account with email, password, full name, and vehicle info
 
 **Example Request:**
 ```bash
-curl -X POST http://localhost:3000/captain/register \
+curl -X POST http://localhost:3000/captains/register \
   -H "Content-Type: application/json" \
   -d '{
     "fullname": {

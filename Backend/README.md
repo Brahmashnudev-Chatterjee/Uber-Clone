@@ -387,3 +387,229 @@ curl -X GET http://localhost:3000/user/logout \
   "message": "Logged out successfully"
 }
 ```
+
+---
+
+## Captain Endpoints
+
+### Register Captain
+**Endpoint:** `POST /captain/register`
+
+**Description:** 
+Register a new captain account with email, password, full name, and vehicle information.
+
+**Request Body:**
+```json
+{
+  "fullname": {
+    "firstname": "string (min: 3 characters, required)",
+    "lastname": "string (min: 3 characters, optional)"
+  },
+  "email": "string (valid email format, required)",
+  "password": "string (min: 6 characters, required)",
+  "vehicle": {
+    "color": "string (min: 3 characters, required)",
+    "plate": "string (min: 3 characters, required)",
+    "capacity": "number (min: 1, required)",
+    "vehicleType": "string (enum: 'car', 'motocycle', 'auto', required)"
+  }
+}
+```
+
+**Response Status Codes:**
+
+| Status Code | Description |
+|---|---|
+| 201 | Captain successfully registered. Returns captain object and authentication token. |
+| 400 | Validation error or captain with email already exists. |
+
+**Success Response (201):**
+```json
+{
+  "token": "string (JWT token)",
+  "captain": {
+    "_id": "string",
+    "fullname": {
+      "firstname": "string",
+      "lastname": "string"
+    },
+    "email": "string",
+    "SocketID": null,
+    "status": "inactive",
+    "vehicle": {
+      "color": "string",
+      "plate": "string",
+      "capacity": "number",
+      "vehicleType": "string"
+    },
+    "location": {
+      "lat": null,
+      "long": null
+    },
+    "__v": 0
+  }
+}
+```
+
+**Error Response (400) - Validation Error:**
+```json
+{
+  "errors": [
+    {
+      "type": "field",
+      "value": "string",
+      "msg": "Error message",
+      "path": "field_name",
+      "location": "body"
+    }
+  ]
+}
+```
+
+**Error Response (400) - Captain Already Exists:**
+```json
+{
+  "error": "Captain with this email already exists"
+}
+```
+
+**Validation Rules:**
+- `fullname.firstname`: Minimum 3 characters required
+- `email`: Must be a valid email format, unique
+- `password`: Minimum 6 characters required
+- `vehicle.color`: Minimum 3 characters required
+- `vehicle.plate`: Minimum 3 characters required
+- `vehicle.capacity`: Must be at least 1 required
+- `vehicle.vehicleType`: Must be one of 'car', 'motocycle', or 'auto'
+
+**Example Request:**
+```bash
+curl -X POST http://localhost:3000/captain/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fullname": {
+      "firstname": "James",
+      "lastname": "Wilson"
+    },
+    "email": "james@example.com",
+    "password": "captain123",
+    "vehicle": {
+      "color": "Black",
+      "plate": "ABC1234",
+      "capacity": 4,
+      "vehicleType": "car"
+    }
+  }'
+```
+
+**Example Responses:**
+
+**Successful Registration (201):**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1MDdmMWY3N2JjZjg2Y2Q3OTk0MzkwMTIiLCJpYXQiOjE2MzUyNzc4MDB9.signature",
+  "captain": {
+    "_id": "507f1f77bcf86cd799439012",
+    "fullname": {
+      "firstname": "James",
+      "lastname": "Wilson"
+    },
+    "email": "james@example.com",
+    "SocketID": null,
+    "status": "inactive",
+    "vehicle": {
+      "color": "Black",
+      "plate": "ABC1234",
+      "capacity": 4,
+      "vehicleType": "car"
+    },
+    "location": {
+      "lat": null,
+      "long": null
+    },
+    "__v": 0
+  }
+}
+```
+
+**Validation Error - Invalid Email (400):**
+```json
+{
+  "errors": [
+    {
+      "type": "field",
+      "value": "invalidemail",
+      "msg": "Please use a valid email address",
+      "path": "email",
+      "location": "body"
+    }
+  ]
+}
+```
+
+**Validation Error - Short Password (400):**
+```json
+{
+  "errors": [
+    {
+      "type": "field",
+      "value": "123",
+      "msg": "Password must be at least 6 characters long",
+      "path": "password",
+      "location": "body"
+    }
+  ]
+}
+```
+
+**Validation Error - Short First Name (400):**
+```json
+{
+  "errors": [
+    {
+      "type": "field",
+      "value": "Jo",
+      "msg": "Firstname must be at least 3 characters long",
+      "path": "fullname.firstname",
+      "location": "body"
+    }
+  ]
+}
+```
+
+**Validation Error - Invalid Vehicle Type (400):**
+```json
+{
+  "errors": [
+    {
+      "type": "field",
+      "value": "truck",
+      "msg": "Vehicle type must be either car, motocycle, or auto",
+      "path": "vehicle.vehicleType",
+      "location": "body"
+    }
+  ]
+}
+```
+
+**Validation Error - Invalid Capacity (400):**
+```json
+{
+  "errors": [
+    {
+      "type": "field",
+      "value": "0",
+      "msg": "Capacity must be at least 1",
+      "path": "vehicle.capacity",
+      "location": "body"
+    }
+  ]
+}
+```
+
+**Captain Already Exists (400):**
+```json
+{
+  "error": "Captain with this email already exists"
+}
+```

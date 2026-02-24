@@ -402,16 +402,16 @@ Register a new captain account with email, password, full name, and vehicle info
 ```json
 {
   "fullname": {
-    "firstname": "string (min: 3 characters, required)",
-    "lastname": "string (min: 3 characters, optional)"
+    "firstname": "string",    // Required: minimum 3 characters
+    "lastname": "string"      // Optional: minimum 3 characters if provided
   },
-  "email": "string (valid email format, required)",
-  "password": "string (min: 6 characters, required)",
+  "email": "string",          // Required: valid email format, must be unique
+  "password": "string",       // Required: minimum 6 characters, will be hashed
   "vehicle": {
-    "color": "string (min: 3 characters, required)",
-    "plate": "string (min: 3 characters, required)",
-    "capacity": "number (min: 1, required)",
-    "vehicleType": "string (enum: 'car', 'motocycle', 'auto', required)"
+    "color": "string",        // Required: minimum 3 characters
+    "plate": "string",        // Required: minimum 3 characters (vehicle license plate)
+    "capacity": "number",     // Required: minimum value 1 (number of passengers)
+    "vehicleType": "string"   // Required: must be one of ['car', 'motocycle', 'auto']
   }
 }
 ```
@@ -426,16 +426,16 @@ Register a new captain account with email, password, full name, and vehicle info
 **Success Response (201):**
 ```json
 {
-  "token": "string (JWT token)",
+  "token": "string (JWT token - expires in 24h)",
   "captain": {
-    "_id": "string",
+    "_id": "string (MongoDB ObjectId)",
     "fullname": {
       "firstname": "string",
       "lastname": "string"
     },
     "email": "string",
     "SocketID": null,
-    "status": "inactive",
+    "status": "inactive",    // Default status for new captains
     "vehicle": {
       "color": "string",
       "plate": "string",
@@ -445,8 +445,7 @@ Register a new captain account with email, password, full name, and vehicle info
     "location": {
       "lat": null,
       "long": null
-    },
-    "__v": 0
+    }
   }
 }
 ```
@@ -473,15 +472,6 @@ Register a new captain account with email, password, full name, and vehicle info
 }
 ```
 
-**Validation Rules:**
-- `fullname.firstname`: Minimum 3 characters required
-- `email`: Must be a valid email format, unique
-- `password`: Minimum 6 characters required
-- `vehicle.color`: Minimum 3 characters required
-- `vehicle.plate`: Minimum 3 characters required
-- `vehicle.capacity`: Must be at least 1 required
-- `vehicle.vehicleType`: Must be one of 'car', 'motocycle', or 'auto'
-
 **Example Request:**
 ```bash
 curl -X POST http://localhost:3000/captains/register \
@@ -502,114 +492,201 @@ curl -X POST http://localhost:3000/captains/register \
   }'
 ```
 
-**Example Responses:**
+---
 
-**Successful Registration (201):**
+### Login Captain
+**Endpoint:** `POST /captains/login`
+
+**Description:** 
+Authenticate a captain with email and password, returning a JWT token for subsequent authenticated requests.
+
+**Request Body:**
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1MDdmMWY3N2JjZjg2Y2Q3OTk0MzkwMTIiLCJpYXQiOjE2MzUyNzc4MDB9.signature",
+  "email": "string",          // Required: valid email format
+  "password": "string"        // Required: minimum 6 characters
+}
+```
+
+**Response Status Codes:**
+
+| Status Code | Description |
+|---|---|
+| 200 | Captain successfully authenticated. Returns captain object and authentication token. |
+| 400 | Validation error. Invalid input data provided. |
+| 401 | Unauthorized. Invalid email or password. |
+
+**Success Response (200):**
+```json
+{
+  "token": "string (JWT token - expires in 24h)",
   "captain": {
-    "_id": "507f1f77bcf86cd799439012",
+    "_id": "string",
     "fullname": {
-      "firstname": "James",
-      "lastname": "Wilson"
+      "firstname": "string",
+      "lastname": "string"
     },
-    "email": "james@example.com",
+    "email": "string",
     "SocketID": null,
-    "status": "inactive",
+    "status": "active or inactive",
     "vehicle": {
-      "color": "Black",
-      "plate": "ABC1234",
-      "capacity": 4,
-      "vehicleType": "car"
+      "color": "string",
+      "plate": "string",
+      "capacity": "number",
+      "vehicleType": "string"
     },
     "location": {
       "lat": null,
       "long": null
-    },
-    "__v": 0
+    }
   }
 }
 ```
 
-**Validation Error - Invalid Email (400):**
+**Error Response (400):**
 ```json
 {
   "errors": [
     {
       "type": "field",
-      "value": "invalidemail",
-      "msg": "Please use a valid email address",
-      "path": "email",
+      "value": "string",
+      "msg": "Error message",
+      "path": "field_name",
       "location": "body"
     }
   ]
 }
 ```
 
-**Validation Error - Short Password (400):**
+**Error Response (401):**
 ```json
 {
-  "errors": [
-    {
-      "type": "field",
-      "value": "123",
-      "msg": "Password must be at least 6 characters long",
-      "path": "password",
-      "location": "body"
-    }
-  ]
+  "error": "Invalid email or password"
 }
 ```
 
-**Validation Error - Short First Name (400):**
+**Example Request:**
+```bash
+curl -X POST http://localhost:3000/captains/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "james@example.com",
+    "password": "captain123"
+  }'
+```
+
+---
+
+### Get Captain Profile
+**Endpoint:** `GET /captains/profile`
+
+**Description:** 
+Retrieve the authenticated captain's profile information. Requires a valid JWT token.
+
+**Authentication:**
+Required. Token must be provided in either:
+- Cookie: `token`
+- Authorization header: `Bearer <token>`
+
+**Request Headers:**
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Response Status Codes:**
+
+| Status Code | Description |
+|---|---|
+| 200 | Successfully retrieved captain profile. |
+| 401 | Unauthorized. Invalid, expired, or blacklisted token. |
+
+**Success Response (200):**
 ```json
 {
-  "errors": [
-    {
-      "type": "field",
-      "value": "Jo",
-      "msg": "Firstname must be at least 3 characters long",
-      "path": "fullname.firstname",
-      "location": "body"
+  "captain": {
+    "_id": "string",
+    "fullname": {
+      "firstname": "string",
+      "lastname": "string"
+    },
+    "email": "string",
+    "SocketID": null,
+    "status": "active or inactive",
+    "vehicle": {
+      "color": "string",
+      "plate": "string",
+      "capacity": "number",
+      "vehicleType": "string"
+    },
+    "location": {
+      "lat": null,
+      "long": null
     }
-  ]
+  }
 }
 ```
 
-**Validation Error - Invalid Vehicle Type (400):**
+**Error Response (401):**
 ```json
 {
-  "errors": [
-    {
-      "type": "field",
-      "value": "truck",
-      "msg": "Vehicle type must be either car, motocycle, or auto",
-      "path": "vehicle.vehicleType",
-      "location": "body"
-    }
-  ]
+  "error": "Unauthorized access"
 }
 ```
 
-**Validation Error - Invalid Capacity (400):**
+**Example Request:**
+```bash
+curl -X GET http://localhost:3000/captains/profile \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+---
+
+### Logout Captain
+**Endpoint:** `GET /captains/logout`
+
+**Description:** 
+Log out the authenticated captain by blacklisting their token and clearing the session cookie.
+
+**Authentication:**
+Required. Token must be provided in either:
+- Cookie: `token`
+- Authorization header: `Bearer <token>`
+
+**Request Headers:**
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Response Status Codes:**
+
+| Status Code | Description |
+|---|---|
+| 200 | Captain successfully logged out. Token blacklisted. |
+| 401 | Unauthorized. Invalid, expired, or blacklisted token. |
+
+**Success Response (200):**
 ```json
 {
-  "errors": [
-    {
-      "type": "field",
-      "value": "0",
-      "msg": "Capacity must be at least 1",
-      "path": "vehicle.capacity",
-      "location": "body"
-    }
-  ]
+  "message": "Logged out successfully"
 }
 ```
 
-**Captain Already Exists (400):**
+**Error Response (401):**
 ```json
 {
-  "error": "Captain with this email already exists"
+  "error": "Unauthorized access"
+}
+```
+
+**Example Request:**
+```bash
+curl -X GET http://localhost:3000/captains/logout \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+**Example Response:**
+```json
+{
+  "message": "Logged out successfully"
 }
 ```

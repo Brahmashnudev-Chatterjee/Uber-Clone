@@ -1,14 +1,15 @@
 const userModel = require('../models/user.model');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-
+const blackListTokenModel = require('../models/blackListToken.model');
+const captainModel = require('../models/captain.model');
 
 module.exports.authUser = async (req, res, next) => {
     const toker = req.cookies.token || (req.headers.authorization && req.headers.authorization.split(' ')[1]);
     if (!toker) {
         return res.status(401).json({ error: 'No token provided' });
     }
-    const isBlacklisted = await userModel.findOne({ token: toker });
+    const isBlacklisted = await blackListTokenModel.findOne({ token: toker });
     if (isBlacklisted) {
         return res.status(401).json({ error: 'Token is blacklisted' });
     }
@@ -22,4 +23,26 @@ module.exports.authUser = async (req, res, next) => {
     } catch (error) {
         return res.status(401).json({ error: 'Unauthorized access' });
     }        
+}
+
+
+module.exports.authCaptain = async (req, res, next) => {
+    const toker = req.cookies.token || (req.headers.authorization && req.headers.authorization.split(' ')[1]);
+    if (!toker) {
+        return res.status(401).json({ error: 'No token provided' });
+    }
+    const isBlacklisted = await blackListTokenModel.findOne({ token: toker });
+    if (isBlacklisted) {
+        return res.status(401).json({ error: 'Token is blacklisted' });
+    }
+    try {
+        const decoded = jwt.verify(toker, process.env.JWT_SECRET);
+        const captain = await captainModel.findById(decoded._id);   
+
+        req.captain = captain;
+        return next();
+    } catch (error) {
+        res.status(401).json({ error: 'Unauthorized access' });
+    }
+
 }

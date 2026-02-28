@@ -16,6 +16,7 @@ export const UserLogin = () => {
       password: password
 
     })
+    console.log(userData);
     setEmail("");
     setPassword("");
   }

@@ -690,3 +690,4 @@ curl -X GET http://localhost:3000/captains/logout \
   "message": "Logged out successfully"
 }
 ```
+Connect Backend with frontend
